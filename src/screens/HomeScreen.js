@@ -10,8 +10,7 @@ import {
   View,
   ImageBackground,
 } from "react-native";
-import Landing from "./Landing.js";
-
+  import axios from 'axios';
 const HomeScreen = () => {
   // isButtonClicked determines whether to render the landing screen, the login screen, or the user signup
   const [isButtonClicked, setIsButtonClicked] = useState("home");
@@ -22,7 +21,33 @@ const HomeScreen = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   // the content variable represents the portion of the page that will render conditionally
   let content;
+  let passwordString;
+  const postUser=(user)=>{
+    axios.post('http://ec2-54-172-44-186.compute-1.amazonaws.com:3000/signup', user)
+              .then((data)=>{
+                console.log('success', data.data)
+              })
+            .catch((err)=>{
+              console.log(user)
+            })
+//     fetch('http://ec2-54-172-44-186.compute-1.amazonaws.com:3000/signup', {
+//   method: 'POST',
+//   headers: {
+//     Accept: 'application/json',
+//     'Content-Type': 'application/json'
+//   },
+//   body: JSON.stringify({email: `${email}`, username: `${username}`, password: `${password}`})
+// });
+
+  }
+
   // isButtonClicked defaults to "home", which renders the login in and sign up buttons, and will change depending on which button the user clicks
+  if (password !== confirmPassword){
+    passwordString = <Text
+    >Passwords do not match.</Text>
+  } else {
+    passwordString = null
+  };
   if (isButtonClicked === "home") {
     content = (
       <View style={styles.landingButtons}>
@@ -38,7 +63,10 @@ const HomeScreen = () => {
           <Button
             color="#b22222"
             title="Create Account"
-            onPress={() => setIsButtonClicked("signUp")}
+            onPress={() => {
+              setIsButtonClicked("signUp")
+            }
+          }
           />
         </View>
       </View>
@@ -46,7 +74,7 @@ const HomeScreen = () => {
   }
   if (isButtonClicked === "login") {
     content = (
-      <View style={styles.signUpContainer}>
+      <View style={styles.loginContainer}>
         <TextInput style={styles.usernameInput} placeholder="Username" />
         <TextInput
           secureTextEntry={true}
@@ -56,7 +84,8 @@ const HomeScreen = () => {
         <View style={styles.homeButtonContainer}>
           <Button
             style={styles.homeButton}
-            onPress={() => setIsButtonClicked("login")}
+            // onPress={() => {setIsButtonClicked("login")
+            // }}
             color="white"
             title="Log In"
           />
@@ -69,7 +98,7 @@ const HomeScreen = () => {
           }}
         />
       </View>
-    );
+    )
   }
   if (isButtonClicked === "signUp") {
     content = (
@@ -101,15 +130,35 @@ const HomeScreen = () => {
           secureTextEntry={true}
           placeholder="Confirm Password"
           autoCorrect={false}
-          onChangeText={(confirmPassword) =>
-            setConfirmPassword(confirmPassword)
-          }
+          onChangeText={(confirm) => {
+            setConfirmPassword(confirm)
+          }}
         />
         <View style={styles.signUpButtonContainer}>
           <Button
             color="#b22222"
             title="Join Us!"
-            onPress={() => setIsButtonClicked("signUp")}
+            onPress={() =>{ setIsButtonClicked("signUp")
+            if(password === confirmPassword){
+              let user = {email: `${email}`, username: `${username}`, password: `${password}`}
+            //   axios.post('http://ec2-54-172-44-186.compute-1.amazonaws.com:3000/signup', user, {
+
+            //     "headers": {
+
+            //       "content-type": "application/json",
+
+            //     },
+            //   })
+            //   .then((data)=>{
+            //     console.log('success', data.data)
+            //   })
+            // .catch((err)=>{
+            //   console.log('yuck', err)
+            // })
+
+            postUser(user);
+          }
+        }}
           />
         </View>
         <Button
@@ -119,6 +168,7 @@ const HomeScreen = () => {
             setIsButtonClicked("home");
           }}
         />
+    {passwordString}
       </View>
     );
   }
@@ -156,8 +206,11 @@ const styles = StyleSheet.create({
   backgroundPhoto: {
     height: 1000,
   },
+  loginContainer: {
+    marginTop:85
+  },
   signUpContainer: {
-    marginTop: 40,
+    marginTop: 75,
   },
   text: {
     fontSize: 30,
